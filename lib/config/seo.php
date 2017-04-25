@@ -6,7 +6,7 @@ $default_sitename = get_bloginfo('name');
 $default_title = get_bloginfo('name');
 $default_description = get_bloginfo('description');
 
-$twitter_handle = '@usbynightfest';
+$twitter_handle = '@wearemrhenry';
 
 $public = true;
 
@@ -16,7 +16,6 @@ $public = true;
 if (!empty($_ENV['ENVIRONMENT']) && $_ENV['ENVIRONMENT'] !== 'production') {
 	$public = false;
 }
-
 
 // Don't index .a.mrhenry & .herokuapp
 if (
@@ -52,7 +51,7 @@ $defaults = array(
 );
 
 function convert_aws_to_imgix($src) {
-	return preg_replace("/(https?:)?\/\/(\w+).f.mrhenry.(eu|be).s3.amazonaws.com/i", "https://$2.imgix.net", $src);
+	return preg_replace("/(https?:)?\/\/wp.assets.sh\/uploads/i", "https://wp-assets-sh.imgix.net", $src);
 }
 
 add_action('wp_head', function () use ($defaults) {

@@ -31,12 +31,12 @@ add_action('admin_init', function() {
 });
 
 /**
- * Hide menu items
+ * Hide menu items for non-administrators
  */
 add_action('admin_menu', function() {
-	// Currently show everything for everyone
-	// in the WP MU setup
-	return;
+	if (current_user_can('administrator')) {
+		return;
+	}
 
 	remove_menu_page('edit.php?post_type=acf-field-group');
 	remove_menu_page('edit-comments.php');

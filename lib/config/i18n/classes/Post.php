@@ -23,6 +23,7 @@ class I18nPost extends TimberPost {
 	public function translations() {
 		$id = !empty($this->object_id) ? $this->object_id : $this->id;
 
+		// Cache the results to run the heavy handling only once
 		if (!$this->_translations) {
 			$language = empty(I18N_CURRENT_LANGUAGE) ? I18N_DEFAULT_LANGUAGE : I18N_CURRENT_LANGUAGE;
 
@@ -33,8 +34,32 @@ class I18nPost extends TimberPost {
 				return array();
 			}
 
+			if ($language !== I18N_DEFAULT_LANGUAGE) {
+				// Copy over fallback fields when they exist in the default language
+				// This cover the edge cases where a language has been added
+				// in the ACF field groups, but the post hasn't been saved since
+				// (ACF creates the correct keys only on save of the post)
+
+				// Find all keys for the default language
+				$fallback_fields = array_filter($all_fields, function ($key) {
+					return strpos($key, I18N_DEFAULT_LANGUAGE) === 0;
+				}, ARRAY_FILTER_USE_KEY);
+
+				foreach ($fallback_fields as $key => $value) {
+					// Translate the default language key to the current language
+					$translated_key = $language . substr($key, strlen(I18N_DEFAULT_LANGUAGE));
+
+					// If the translated version does not exist, copy over the fallback fields
+					if (!isset($all_fields[$translated_key])) {
+						$all_fields[$translated_key] = $value;
+					}
+				}
+			}
+
+			// Loop over all known custom fields for this post
 			foreach (array_keys($all_fields) as $group) {
-				// Field group with name `en` gets copied to the root array
+
+				// Field group with name `shortcode` gets copied to the root array
 				if ($group === I18N_CURRENT_LANGUAGE) {
 					$data = $all_fields[$group];
 					$fallback = $all_fields[I18N_DEFAULT_LANGUAGE];

@@ -10,18 +10,8 @@ $twitter_handle = '@wearemrhenry';
 
 $public = true;
 
-// `public` defaults to true
-// so we don't fuck up the SEO by forgetting
-// to set the ENVIRONMENT constant
-if (!empty($_ENV['ENVIRONMENT']) && $_ENV['ENVIRONMENT'] !== 'production') {
-	$public = false;
-}
-
 // Don't index .a.mrhenry & .herokuapp
-if (
-	   strpos($_SERVER['HTTP_HOST'], '.a.mrhenry') > 0
-	|| strpos($_SERVER['HTTP_HOST'], 'herokuapp') > 0
-) {
+if (strpos($_SERVER['HTTP_HOST'], '.wp.mrhenry') > 0) {
 	$public = false;
 }
 
@@ -50,8 +40,8 @@ $defaults = array(
 	'twitter:image' => ''
 );
 
-function convert_aws_to_imgix($src) {
-	return preg_replace("/(https?:)?\/\/wp.assets.sh\/uploads/i", "https://wp-assets-sh.imgix.net", $src);
+function convert_gcs_to_imgix($src) {
+	return preg_replace("/https:\/\/wp\.assets\.sh\/uploads/i", "https://wp-assets-sh.imgix.net", $src);
 }
 
 add_action('wp_head', function () use ($defaults) {
@@ -63,17 +53,38 @@ add_action('wp_head', function () use ($defaults) {
 	$parsed = new I18nPost($post_id);
 	$custom = !empty($parsed->translations['seo']) ? $parsed->translations['seo'] : array();
 
-	// Default title
-	// Can only set the default inside the wp_head hook,
-	// because we don't know the $post outside the hook
-	if (!is_front_page()) {
-		$default_title = get_the_title($post_id) . ' | ' . $defaults['seo:title'];
+	// Fix $custom behavior for one-lang sites
+	// @todo - Investigate
+	if (empty($custom)) {
+		foreach ($defaults as $key => $value) {
+			$override = get_field($key, $parsed);
+
+			if (!empty($override)) {
+				$custom[$key] = $override;
+			}
+		}
+	}
+
+	if (is_404()) {
+		// Override title for 404 page
+		if (!empty(I18N_CURRENT_LANGUAGE) && I18N_CURRENT_LANGUAGE === 'en') {
+			$default_title = 'Page not found';
+		}  else {
+			$default_title = 'Pagina niet gevonden';
+		}
+
+		$defaults['seo:title'] = $default_title;
+	} else if (!is_front_page()) {
+		// Default title
+		// Can only set the default inside the wp_head hook,
+		// because we don't know the $post outside the hook
+		$default_title = get_the_title($post_id);
 		$defaults['seo:title'] = $default_title;
 	}
 
 	// Default image
 	$hero = get_field('hero_image', $post_id);
-	$hero = convert_aws_to_imgix($hero);
+	$hero = convert_gcs_to_imgix($hero);
 
 	if (!empty($hero)) {
 		$defaults['og:image'] = $hero;
@@ -83,6 +94,15 @@ add_action('wp_head', function () use ($defaults) {
 	$canonical = wp_get_canonical_url($post_id);
 
 	echo '<link rel="canonical" href="' . $canonical . '">' . "\r\n";
+
+	if (!empty(I18N_SUPPORTED_LANGUAGES)) {
+		foreach ($parsed->translated() as $lang => $alternate) {
+			if ($lang !== I18N_CURRENT_LANGUAGE) {
+				echo '<link rel="alternate" hreflang="' . $lang . '" href="' . $alternate . '">' . "\r\n";
+			}
+		}
+	}
+
 	$defaults['og:url'] = $canonical;
 
 	$meta_tags = array();
@@ -94,14 +114,22 @@ add_action('wp_head', function () use ($defaults) {
 
 		$property = str_replace('seo:', '', $property);
 
+		if (!is_front_page() && $property === 'title') {
+			$content = $content . ' | ' . get_bloginfo('name');
+		}
+
+		if ($property === 'description') {
+			$content = htmlentities($content);
+		}
+
 		$meta_tags[$property] = $content;
 	}
 
 	// Fallbacks for description and title
 	$meta_tags['og:title'] = empty($meta_tags['og:title']) ? $meta_tags['title'] : $meta_tags['og:title'];
 	$meta_tags['twitter:title'] = empty($meta_tags['twitter:title']) ? $meta_tags['title'] : $meta_tags['twitter:title'];
-	$meta_tags['og:description'] = empty($meta_tags['og:description']) ? $meta_tags['description'] : $meta_tags['og:description'];
-	$meta_tags['twitter:description'] = empty($meta_tags['twitter:description']) ? $meta_tags['description'] : $meta_tags['twitter:description'];
+	$meta_tags['og:description'] = empty($meta_tags['og:description']) ? $meta_tags['description'] : htmlentities($meta_tags['og:description']);
+	$meta_tags['twitter:description'] = empty($meta_tags['twitter:description']) ? $meta_tags['description'] : htmlentities($meta_tags['twitter:description']);
 
 	foreach ($meta_tags as $property => $content) {
 
@@ -111,7 +139,7 @@ add_action('wp_head', function () use ($defaults) {
 		}
 
 		if ($property === 'og:image') {
-			$content = convert_aws_to_imgix($content);
+			$content = convert_gcs_to_imgix($content);
 			$content = $content . '?w=1200&h=630&auto=format%2Ccompress&fit=crop&crop=faces%2Centropy';
 
 			echo '<meta property="og:image:width" content="1200">' . "\r\n";
@@ -119,7 +147,7 @@ add_action('wp_head', function () use ($defaults) {
 		}
 
 		if ($property === 'twitter:image') {
-			$content = convert_aws_to_imgix($content);
+			$content = convert_gcs_to_imgix($content);
 
 			if (!empty($meta_tags['twitter:card'])) {
 				if ($meta_tags['twitter:card'] === 'summary_large_image') {

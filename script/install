@@ -52,7 +52,7 @@ then
 	exit 1
 fi
 
-THEME_PATH="wp-content/themes/$THEME_SLUG"
+THEME_PATH="./wp-content/themes/$THEME_SLUG"
 TMP_FILE=$(mktemp)
 
 
@@ -87,6 +87,5 @@ rm -Rf $THEME_PATH/script
 rm -Rf $THEME_PATH/wp-base-theme-master
 
 # The end
-echo -e "\n**************************************************"
 echo -e "\n--> Your theme is succesfully bootstrapped in $THEME_PATH"
-echo -e "\n\n--> That's it! Happy developing :)\n"
+echo -e "\n--> That's it! Happy developing :)\n"

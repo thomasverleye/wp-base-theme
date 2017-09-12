@@ -62,9 +62,9 @@ echo -e "\n--> Downloading template files"
 curl -L https://github.com/mrhenry/wp-base-theme/archive/master.zip > "$TMP_FILE"
 
 # Extract
-echo -e "\n--> Extracting"
+echo -e "\n--> Extracting zip"
 
-unzip "$TMP_FILE" -d $THEME_PATH
+unzip "$TMP_FILE" -d $THEME_PATH > /dev/null 2>&1
 
 # Copy files
 echo -e "\n--> Copying files"
@@ -73,13 +73,20 @@ cp -R $THEME_PATH/wp-base-theme-master/* $THEME_PATH
 cp -R $THEME_PATH/wp-base-theme-master/.[^.]* $THEME_PATH
 
 # Bootstrap files
+echo -e "\n--> Bootstrap files"
+
 sed -i.tmp "s:{{THEME}}:${THEME_NAME}:g" $THEME_PATH/style.css
 
 # Clean up
-echo -e "\n--> Removing installation files"
+echo -e "\n--> Clean up"
 
 rm $TMP_FILE
 rm -Rf $THEME_PATH/*.tmp
 rm -Rf $THEME_PATH/docs
 rm -Rf $THEME_PATH/script
 rm -Rf $THEME_PATH/wp-base-theme-master
+
+# The end
+echo -e "\n**************************************************"
+echo -e "\n--> Your theme is succesfully bootstrapped in $THEME_PATH"
+echo -e "\n\n--> That's it! Happy developing :)\n"

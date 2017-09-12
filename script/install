@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+set -e
+
+# Check for correct install folder
+if [[ -z $(ls | grep wp-content) ]]
+then
+	echo -e "\n[Error] Run in root folder of your WP install"
+fi
+
+# Ask & set theme name & slug
+while [ "$SLUG_OK" != "y" ]
+do
+	echo -e "\n--> Give a project name"
+	echo -e "    (Full name, we create the slug based on this name)"
+	read THEME_NAME
+
+	THEME_SLUG=$(echo $THEME_NAME | tr '[:upper:]' '[:lower:]' | tr -d '[:space:][:punct:]')
+
+	echo -e "\n--> We'll be using following settings:"
+	echo -e "    slug: ${THEME_SLUG}"
+
+	echo -e "\nOK? (y)es or (n)o"
+	read SLUG_OK
+done
+
+# Check if theme with that slug already exists
+if [[ -d "wp-content/themes/$THEME_SLUG" ]]
+then
+	echo -e "\n[Error] Theme $THEME_SLUG already exists."
+	exit 1
+fi
+
+THEME_PATH="wp-content/themes/$THEME_SLUG"
+TMP_FILE=$(mktemp)
+
+
+# Download base theme
+echo -e "\n--> Downloading template files"
+
+curl -L https://github.com/mrhenry/wp-base-theme/archive/master.zip > "$TMP_FILE"
+
+# Extract
+echo -e "\n--> Extracting"
+
+unzip "$TMP_FILE" -d $THEME_PATH
+
+# Copy files
+echo -e "\n--> Copying files"
+
+cp -R $THEME_PATH/wp-base-theme-master/* $THEME_PATH
+cp -R $THEME_PATH/wp-base-theme-master/.[^.]* $THEME_PATH
+
+# Bootstrap files
+sed -i.tmp "s:{{THEME}}:${THEME_NAME}:g" $THEME_PATH/style.css
+
+# Clean up
+echo -e "\n--> Removing installation files"
+
+rm $TMP_FILE
+rm -Rf $THEME_PATH/*.tmp
+rm -Rf $THEME_PATH/docs
+rm -Rf $THEME_PATH/script
+rm -Rf $THEME_PATH/wp-base-theme-master

@@ -21,7 +21,6 @@ cat << "EOF"
 
 EOF
 
-exit 1
 
 # Check for correct install folder
 if [[ -z $(ls | grep wp-content) ]]

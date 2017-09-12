@@ -4,12 +4,11 @@
 
 Wordpress Base Theme is a ready-to-go, biased basic Wordpress theme using Timber.
 
-## Installation
+## Install
 
-1. Clone this repo inside your `wp-content/themes` folder
-2. Rename the folder
-3. Edit the `{{ THEME }}` placeholder inside `style.css`
-4. Activate your theme for your site
+```
+$ bash <(curl -s https://raw.githubusercontent.com/mrhenry/wp-base-theme/master/script/install)
+```
 
 ## Need more help?
 

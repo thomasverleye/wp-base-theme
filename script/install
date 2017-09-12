@@ -26,6 +26,7 @@ EOF
 if [[ -z $(ls | grep wp-content) ]]
 then
 	echo -e "\n[Error] Run in root folder of your WP install"
+	exit 1
 fi
 
 # Ask & set theme name & slug

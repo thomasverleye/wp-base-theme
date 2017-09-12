@@ -7,7 +7,7 @@ Wordpress Base Theme is a ready-to-go, biased basic Wordpress theme using Timber
 ## Install
 
 ```
-$ bash <(curl -s https://raw.githubusercontent.com/mrhenry/wp-base-theme/master/script/install)
+$ bash <(curl -s https://raw.githubusercontent.com/mrhenry/wp-base-theme/master/script/install -H 'Cache-Control: no-cache')
 ```
 
 ## Need more help?

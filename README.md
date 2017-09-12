@@ -1,4 +1,4 @@
-# Wordpress base theme
+# Wordpress Base Theme
 
 ## What is this
 

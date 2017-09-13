@@ -41,6 +41,10 @@ $defaults = array(
 );
 
 function convert_gcs_to_imgix($src) {
+	if (is_array($src) && !empty($src['url'])) {
+		$src = $src['url'];
+	}
+
 	return preg_replace("/https:\/\/wp\.assets\.sh\/uploads/i", "https://wp-assets-sh.imgix.net", $src);
 }
 

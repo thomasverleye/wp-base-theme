@@ -1,15 +1,15 @@
 <?php
 
-register_nav_menus(array(
-	'primary_navigation' => 'Primary Navigation'
-));
+register_nav_menus(
+	array(
+		'primary_navigation' => 'Primary Navigation',
+	)
+);
 
-add_filter('timber_context', 'add_menus_to_context');
-
-function add_menus_to_context($data) {
+add_filter( 'timber_context', function ( $data ) {
 	$data['menus'] = array(
-		'primary_navigation' => new TimberMenu('primary_navigation')
+		'primary_navigation' => new TimberMenu( 'primary_navigation' ),
 	);
 
 	return $data;
-}
+});

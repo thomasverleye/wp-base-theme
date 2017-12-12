@@ -5,9 +5,9 @@
 		<meta http-equiv="x-ua-compatible" content="ie=edge,chrome=1">
 		<meta name="viewport" content="width=device-width, initial-scale=1, minimal-ui">
 
-		<link rel="icon" href="/wp-content/themes/{{ theme.slug }}/favicon.ico" type="image/x-icon">
+		<link rel="icon" href="{{ asset_url }}/favicon.ico" type="image/x-icon">
 
-		<link rel="stylesheet" href="/wp-content/themes/{{ theme.slug }}/public/assets/css/application.min.css" />
+		<link rel="stylesheet" href="{{ asset_url }}/public/assets/css/application.min.css" />
 
 		<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=default-3.6,Symbol,fetch,Array.prototype.includes&flags=gated&version=latest&unknown=polyfill" defer></script>
 
@@ -15,20 +15,39 @@
 			// Initialize GTM dataLayer
 			window.dataLayer = [];
 
-			// Mustard Cutting.
-			// Bye, bye, IE9 & 10
-			if (('MutationObserver' in window)) {
-				// If we support native Custom Elements (v1)
-				// we assume decent ES2015 support & load in the Rollup bundle
-				if ('customElements' in window) {
-					document.write('<script src="/wp-content/themes/{{ theme.slug }}/public/assets/js/app.es6.js" defer><\/script>');
+			(function(w, d) {
+				// Mustard Cutting.
+				// Bye, bye, IE9 & 10
+				if (('MutationObserver' in w)) {
+					d.documentElement.classList.remove('no-js');
 
-				// Else, we load a fallback & run the transpiled bundle from Babel
-				} else {
-					document.write('<script src="//cdn.rawgit.com/mrhenry/custom-elements-helpers/b2c7bc9a/polyfill/custom-elements.js" defer><\/script>');
-					document.write('<script src="/wp-content/themes/{{ theme.slug }}/public/assets/js/app.js" defer><\/script>');
+					function loadScript(src, async, defer) {
+						async = typeof async === 'undefined' ? true : !!async;
+						defer = typeof defer === 'undefined' ? true : !!defer;
+
+						var s = d.createElement('script');
+						s.async = async;
+						s.defer = defer;
+						s.src = src;
+
+						var f = d.getElementsByTagName('script')[0];
+						f.parentNode.insertBefore(s, f);
+					};
+
+					var mode = ('customElements' in w) ? 'es6' : 'es5';
+
+					// If we support native Custom Elements (v1)
+					// we assume decent ES2015 support & load in the Rollup bundle
+					if (mode === 'es6') {
+						loadScript('{{ asset_url }}/assets/js/app.es6.min.js', true, false);
+
+					// Else, we load a fallback & run the transpiled bundle from Babel
+					} else {
+						loadScript('https://cdn.rawgit.com/mrhenry/custom-elements-helpers/7a4574bf/polyfill/custom-elements.js', false, true);
+						loadScript('{{ asset_url }}/assets/js/app.min.js', false, true);
+					}
 				}
-			}
+			})(window, document);
 		</script>
 
 		<!-- Google Tag Manager -->

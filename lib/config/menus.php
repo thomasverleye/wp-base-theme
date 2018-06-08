@@ -6,10 +6,12 @@ register_nav_menus(
 	)
 );
 
-add_filter( 'timber_context', function ( $data ) {
-	$data['menus'] = array(
-		'primary_navigation' => new TimberMenu( 'primary_navigation' ),
-	);
+add_filter(
+	'timber_context', function ( $data ) {
+		$data['menus'] = array(
+			'primary_navigation' => new TimberMenu( 'primary_navigation' ),
+		);
 
-	return $data;
-});
+		return $data;
+	}
+);

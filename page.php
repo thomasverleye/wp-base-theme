@@ -2,7 +2,8 @@
 
 $context = Timber::get_context();
 
-$context['page'] = $page = new TimberPost();
+$page            = new TimberPost();
+$context['page'] = $page;
 
 Timber::render(
 	array(

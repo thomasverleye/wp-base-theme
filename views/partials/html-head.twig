@@ -25,8 +25,6 @@
 		<meta name="msapplication-wide310x150logo"   content="{{ asset_url }}/assets/favicons/widetile.png" />
 		<meta name="msapplication-square310x310logo" content="{{ asset_url }}/assets/favicons/largetile.png" />
 
-		<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=default-3.6,Symbol,fetch,Array.prototype.includes&flags=gated&version=latest&unknown=polyfill" defer></script>
-
 		<script>
 			// Initialize GTM dataLayer
 			window.dataLayer = [];
@@ -59,6 +57,7 @@
 
 					// Else, we load a fallback & run the transpiled bundle from Babel
 					} else {
+						loadScript('https://cdn.polyfill.io/v2/polyfill.min.js?features=default-3.6,Symbol,fetch,Array.prototype.includes,Array.prototype.find,Object.entries&flags=gated&version=latest&unknown=polyfill', false, true);
 						loadScript('https://cdn.rawgit.com/webcomponents/custom-elements/6ad99939/custom-elements.min.js', false, true);
 						loadScript('{{ asset_url }}/assets/js/app.min.js', false, true);
 					}
